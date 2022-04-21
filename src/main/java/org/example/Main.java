@@ -10,6 +10,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 import org.eclipse.jgit.api.Git;
@@ -66,28 +67,33 @@ public class Main {
             System.out.println("\n>>> Printing commit log\n");
             Iterable<RevCommit> commitLog = git.log().call();
 
+            List<String[]> valuesToDisplay = new ArrayList<String[]>();
 
             for (RevCommit revCommit : commitLog) {
-                /*int nbJavaFilesInCommit =*/ getAllFilesInAnCommit(revCommit, repo);
-               // System.out.println("commitId: " + revCommit.getId() + " nbJavaFiles: " + nbJavaFilesInCommit);
-
-
+                String[] values = getAllFilesInAnCommit(revCommit, repo);
+                if(values.length > 0){
+                    valuesToDisplay.add(values);
+                }
             }
+            CSVMaker.toCsv("GitVersionsData",valuesToDisplay);
 
 
         }
     }
+
+
 
     // src: https://stackoverflow.com/questions/19941597/use-jgit-treewalk-to-list-files-and-folders
     /*
      * Lire le contenu des fichier dans un commit git :
      * https://stackoverflow.com/questions/10993634/how-do-i-do-git-show-sha1file-using-jgit
     */
-    public static void getAllFilesInAnCommit(RevCommit commit, Repository repository) throws IOException {
+    public static String[] getAllFilesInAnCommit(RevCommit commit, Repository repository) throws IOException {
 
         int nbJavaFiles = 0;
         int wmcTotal = 0;
         double bcTotal = 0.0;
+        String[] values = new String[]{};
 
         RevTree tree = commit.getTree();
         TreeWalk treeWalk = new TreeWalk(repository);
@@ -123,9 +129,9 @@ public class Main {
         if(nbJavaFiles != 0){
             double mWmc = wmcTotal / (double)nbJavaFiles;
             double mBc = bcTotal / (double) nbJavaFiles;
-            System.out.println("Version: " + commit.getId() + " mWmc: "+mWmc +" mBc: "+mBc);
+            values = new String[]{commit.getId()+"", nbJavaFiles+"", mWmc+"", mBc+""};
         }
-       // return nbJavaFiles;
+        return values;
     }
 
     public static int getWmc(BufferedReader texte){
