@@ -143,13 +143,20 @@ public class Main {
     }
 
     public static Double getBc(BufferedReader texte){
+        System.out.println("------ Test BC ------");
         int classCloc = ClassMetrics.getClasseCLOC(texte);
         int classLoc = ClassMetrics.getClasseLOC(texte);
         int wmc = getWmc(texte);
         double DC = ClassMetrics.getClasseDC(classCloc,classLoc);
         double BC = ClassMetrics.getClasseBC(DC,wmc);
 
+        System.out.println("Mon Loc: "+ classLoc);
+        System.out.println("Mon Cloc: "+ classCloc);
+        System.out.println("Mon Wmc: "+ wmc);
+        System.out.println("Mon DC: "+ DC);
+
         System.out.println("Mon BC est: "+ BC);
+        System.out.println("------ Fin Test BC ------");
         return BC;
     }
 
