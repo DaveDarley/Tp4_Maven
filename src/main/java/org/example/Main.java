@@ -82,12 +82,15 @@ public class Main {
     }
 
 
-
-    // src: https://stackoverflow.com/questions/19941597/use-jgit-treewalk-to-list-files-and-folders
     /*
-     * Lire le contenu des fichier dans un commit git :
+     * Src:
      * https://stackoverflow.com/questions/10993634/how-do-i-do-git-show-sha1file-using-jgit
+     * https://stackoverflow.com/questions/19941597/use-jgit-treewalk-to-list-files-and-folders
     */
+    /*
+     * Fonction qui parcours tous les fichiers d'un commit git et retourne les metriques (mWmc,mcBc)
+     * si il existe des fichiers .java dans le commit
+     *  */
     public static String[] getAllFilesInAnCommit(RevCommit commit, Repository repository) throws IOException {
 
         int nbJavaFiles = 0;
@@ -100,20 +103,20 @@ public class Main {
         treeWalk.addTree(tree);
         treeWalk.setRecursive(false);
         while (treeWalk.next()) {
+
             if (treeWalk.isSubtree()) {
-               // System.out.println("dir: " + treeWalk.getPathString());
+               // Je suis un repertoire non vide
                 treeWalk.enterSubtree();
             } else {
-
+                // Je suis un fichier
                 if(treeWalk.getPathString().contains(".java")){
-                    String fileContents = "";
                     // Recuperer le contenu des fichiers ".java"
+                    String fileContents = "";
                     ObjectId blobId = treeWalk.getObjectId(0);
                     try (ObjectReader objectReader = repository.newObjectReader()) {
                         ObjectLoader objectLoader = objectReader.open(blobId);
                         byte[] bytes = objectLoader.getBytes();
                         fileContents = new String(bytes, StandardCharsets.UTF_8);
-                       // System.out.println(fileContents);
                     }
 
                     Reader inputString = new StringReader(fileContents);
@@ -123,9 +126,9 @@ public class Main {
                     bcTotal += getBc(reader);
                     nbJavaFiles ++;
                 }
-               // System.out.println("file: " + treeWalk.getPathString());
             }
         }
+
         if(nbJavaFiles != 0){
             double mWmc = wmcTotal / (double)nbJavaFiles;
             double mBc = bcTotal / (double) nbJavaFiles;
@@ -145,6 +148,8 @@ public class Main {
         int wmc = getWmc(texte);
         double DC = ClassMetrics.getClasseDC(classCloc,classLoc);
         double BC = ClassMetrics.getClasseBC(DC,wmc);
+
+        System.out.println("Mon BC est: "+ BC);
         return BC;
     }
 
