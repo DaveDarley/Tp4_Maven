@@ -8,6 +8,7 @@ import java.net.URLClassLoader;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -36,6 +37,9 @@ import org.eclipse.jgit.treewalk.TreeWalk;
 
 public class Main {
 
+    /*
+     * src: https://stackoverflow.com/questions/15822544/jgit-how-to-get-all-commits-of-a-branch-without-changes-to-the-working-direct
+    */
     public static void main(String[] args)
             throws IOException, InvalidRemoteException, TransportException, GitAPIException {
 
@@ -55,29 +59,26 @@ public class Main {
                 .setURI("https://github.com/laurencefortin/ift3913-tp4").call().getRepository();
 
         try (Git git = new Git(repo)) {
-            /*
-             * Get list of all branches (including remote) & print
-             *
-             * Equivalent of --> $ git branch -a
-             *
-             */
-            System.out.println("\n>>> Listing all branches\n");
-            git.branchList().setListMode(ListMode.ALL).call().stream().forEach(r -> System.out.println(r.getName()));
 
-            System.out.println("\n>>> Printing commit log\n");
-            Iterable<RevCommit> commitLog = git.log().call();
+            List<Ref> branches = git.branchList().call(); // list qui contient toutes les branches de mon repertoire
 
-            List<String[]> valuesToDisplay = new ArrayList<String[]>();
+            for (Ref branch : branches) {
+                String branchName = branch.getName();
+                if(branchName.equals("refs/heads/master")){
+                    //Recuperation de toutes les commits de ma branche master
+                    Iterable<RevCommit> commits = git.log().add(repo.resolve(branchName)).call();
 
-            for (RevCommit revCommit : commitLog) {
-                String[] values = getAllFilesInAnCommit(revCommit, repo);
-                if(values.length > 0){
-                    valuesToDisplay.add(values);
+                    List<String[]> valuesToDisplay = new ArrayList<String[]>();
+
+                    for (RevCommit revCommit : commits) {
+                        String[] values = getAllFilesInAnCommit(revCommit, repo);
+                        if(values.length > 0){
+                            valuesToDisplay.add(values);
+                        }
+                    }
+                    CSVMaker.toCsv("GitVersionsData",valuesToDisplay);
                 }
             }
-            CSVMaker.toCsv("GitVersionsData",valuesToDisplay);
-
-
         }
     }
 
@@ -117,14 +118,23 @@ public class Main {
                         ObjectLoader objectLoader = objectReader.open(blobId);
                         byte[] bytes = objectLoader.getBytes();
                         fileContents = new String(bytes, StandardCharsets.UTF_8);
+
+//                        Files.write(Paths.get("FichierTest.txt"), fileContents.getBytes());
+//                        BufferedReader texte = ClassMetrics.readFiles("FichierTest.txt");
+
+                        Reader inputStringWmc = new StringReader(fileContents);
+                        BufferedReader texteWmc = new BufferedReader(inputStringWmc);
+
+                        wmcTotal += getWmc(texteWmc);
+
+                        Reader inputStringBc = new StringReader(fileContents);
+                        BufferedReader texteBc = new BufferedReader(inputStringBc);
+                        bcTotal += getBc(texteBc);
+                        nbJavaFiles ++;
+
+                        System.out.println(fileContents);
                     }
 
-                    Reader inputString = new StringReader(fileContents);
-                    BufferedReader reader = new BufferedReader(inputString);
-
-                    wmcTotal += getWmc(reader);
-                    bcTotal += getBc(reader);
-                    nbJavaFiles ++;
                 }
             }
         }
