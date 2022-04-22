@@ -90,8 +90,8 @@ public class Main {
                     }
 
                     // PR TESTER AVEC AUTRE REPERTOIRE QUE LE JFREECHART
-                    //CSVMaker.toCsv("GitVersionsData",valuesToDisplay);
-                    //FileUtils.forceDelete(new File("LocalRepo"));
+//                    CSVMaker.toCsv("GitVersionsData",valuesToDisplay);
+//                    FileUtils.forceDelete(new File("LocalRepo"));
                 }
             }
         }
@@ -150,7 +150,7 @@ public class Main {
         if(nbJavaFiles != 0){
             double mWmc = wmcTotal / (double)nbJavaFiles;
             double mBc = bcTotal / (double) nbJavaFiles;
-            values = new String[]{commit.getId()+"", nbJavaFiles+"", mWmc+"", mBc+""};
+            values = new String[]{commit.getId().getName(), nbJavaFiles+"", mWmc+"", mBc+""};
         }
         return values;
     }
