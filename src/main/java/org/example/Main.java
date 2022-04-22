@@ -56,7 +56,7 @@ public class Main {
          */
         System.out.println("\n>>> Cloning repository\n");
         Repository repo = Git.cloneRepository().setProgressMonitor(consoleProgressMonitor).setDirectory(localRepoDir)
-                .setURI("https://github.com/laurencefortin/ift3913-tp4").call().getRepository();
+                .setURI("https://github.com/jfree/jfreechart").call().getRepository();
 
         try (Git git = new Git(repo)) {
 
@@ -69,14 +69,22 @@ public class Main {
                     Iterable<RevCommit> commits = git.log().add(repo.resolve(branchName)).call();
 
                     List<String[]> valuesToDisplay = new ArrayList<String[]>();
-
+                    int i = 1;
                     for (RevCommit revCommit : commits) {
+                        System.out.println(i);
+                        if(i == 212){ // pr prendre juste 5% des commits du jfreechart
+                            CSVMaker.toCsv("GitVersionsData",valuesToDisplay);
+                            return;
+                        }
+
                         String[] values = getAllFilesInAnCommit(revCommit, repo);
                         if(values.length > 0){
                             valuesToDisplay.add(values);
                         }
+                        i++;
+
                     }
-                    CSVMaker.toCsv("GitVersionsData",valuesToDisplay);
+                    //CSVMaker.toCsv("GitVersionsData",valuesToDisplay);
                 }
             }
         }
@@ -88,10 +96,11 @@ public class Main {
      * https://stackoverflow.com/questions/10993634/how-do-i-do-git-show-sha1file-using-jgit
      * https://stackoverflow.com/questions/19941597/use-jgit-treewalk-to-list-files-and-folders
     */
+
     /*
      * Fonction qui parcours tous les fichiers d'un commit git et retourne les metriques (mWmc,mcBc)
      * si il existe des fichiers .java dans le commit
-     *  */
+    */
     public static String[] getAllFilesInAnCommit(RevCommit commit, Repository repository) throws IOException {
 
         int nbJavaFiles = 0;
@@ -119,20 +128,11 @@ public class Main {
                         byte[] bytes = objectLoader.getBytes();
                         fileContents = new String(bytes, StandardCharsets.UTF_8);
 
-//                        Files.write(Paths.get("FichierTest.txt"), fileContents.getBytes());
-//                        BufferedReader texte = ClassMetrics.readFiles("FichierTest.txt");
+                        Files.write(Paths.get("FichierJava.txt"), fileContents.getBytes());
 
-                        Reader inputStringWmc = new StringReader(fileContents);
-                        BufferedReader texteWmc = new BufferedReader(inputStringWmc);
-
-                        wmcTotal += getWmc(texteWmc);
-
-                        Reader inputStringBc = new StringReader(fileContents);
-                        BufferedReader texteBc = new BufferedReader(inputStringBc);
-                        bcTotal += getBc(texteBc);
+                        wmcTotal += getWmc("FichierJava.txt");
+                        bcTotal += getBc("FichierJava.txt");
                         nbJavaFiles ++;
-
-                        System.out.println(fileContents);
                     }
 
                 }
@@ -147,26 +147,31 @@ public class Main {
         return values;
     }
 
-    public static int getWmc(BufferedReader texte){
-        int wmc = ClassMetrics.getWMC(texte);
+    public static int getWmc(String fichier){
+        BufferedReader texteWmc = ClassMetrics.readFiles(fichier);
+        int wmc = ClassMetrics.getWMC(texteWmc);
         return wmc;
     }
 
-    public static Double getBc(BufferedReader texte){
-        System.out.println("------ Test BC ------");
-        int classCloc = ClassMetrics.getClasseCLOC(texte);
-        int classLoc = ClassMetrics.getClasseLOC(texte);
-        int wmc = getWmc(texte);
+    /*
+     * Pas du tt efficace mais manque de temps
+     * A chaque fois je dois re-creer un BufferedReader pour pouvoir lire le fichier
+     * sinon apres la premiere lecture le pointeur se trouve a la fin du texte.
+     */
+
+    public static Double getBc(String fichier){
+
+        BufferedReader texteCloc = ClassMetrics.readFiles(fichier);
+        int classCloc = ClassMetrics.getClasseCLOC(texteCloc);
+
+        BufferedReader texteLoc = ClassMetrics.readFiles(fichier);
+        int classLoc = ClassMetrics.getClasseLOC(texteLoc);
+
+        int wmc = getWmc(fichier);
+
         double DC = ClassMetrics.getClasseDC(classCloc,classLoc);
         double BC = ClassMetrics.getClasseBC(DC,wmc);
 
-        System.out.println("Mon Loc: "+ classLoc);
-        System.out.println("Mon Cloc: "+ classCloc);
-        System.out.println("Mon Wmc: "+ wmc);
-        System.out.println("Mon DC: "+ DC);
-
-        System.out.println("Mon BC est: "+ BC);
-        System.out.println("------ Fin Test BC ------");
         return BC;
     }
 
