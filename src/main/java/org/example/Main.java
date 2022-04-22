@@ -72,6 +72,8 @@ public class Main {
                     List<String[]> valuesToDisplay = new ArrayList<String[]>();
                     int i = 1;
                     for (RevCommit revCommit : commits) {
+
+                        // pas du tt efficace
                         System.out.println(i);
                         if(i == 212){ // pr prendre juste 5% des commits du jfreechart (5% de 4211 == 211)
                             CSVMaker.toCsv("GitVersionsData",valuesToDisplay);
@@ -150,7 +152,7 @@ public class Main {
         if(nbJavaFiles != 0){
             double mWmc = wmcTotal / (double)nbJavaFiles;
             double mBc = bcTotal / (double) nbJavaFiles;
-            values = new String[]{commit.getId().getName(), nbJavaFiles+"", mWmc+"", mBc+""};
+            values = new String[]{commit.getId().getName(), nbJavaFiles+"", mWmc+"", mBc+"", commit.getAuthorIdent().getWhen()+""};
         }
         return values;
     }

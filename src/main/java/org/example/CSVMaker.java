@@ -11,8 +11,8 @@ public class CSVMaker {
         File csvFile = new File(file);
         try {
             PrintWriter out = new PrintWriter(csvFile);
-            out.printf("%s, %s, %s, %s\n",
-                    "id_version","NC","mWMC","mcBC");
+            out.printf("%s, %s, %s, %s, %s\n",
+                    "id_version","NC","mWMC","mcBC","timeOfCommit");
 
             for(int i = 0; i < container.size(); i++){
                 for(int j = 0; j < container.get(i).length - 1; j++){
