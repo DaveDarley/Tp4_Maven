@@ -1,22 +1,18 @@
 package org.example;
 
+/*
+ * maven repository pour jgit et common:
+ * https://mvnrepository.com/
+ */
+
 import java.io.*;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 
 import org.eclipse.jgit.api.Git;
-import org.eclipse.jgit.api.ListBranchCommand.ListMode;
-import org.eclipse.jgit.api.Status;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.api.errors.InvalidRemoteException;
 import org.eclipse.jgit.api.errors.TransportException;
@@ -25,21 +21,21 @@ import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.treewalk.TreeWalk;
 
+import org.apache.commons.io.FileUtils;
 
-/*
- * Iterate through all files from an commits:
- * https://stackoverflow.com/questions/40590039/how-to-get-the-file-list-for-a-commit-with-jgit
-*/
 
 // JGit java: https://archive.eclipse.org/jgit/docs/jgit-2.0.0.201206130900-r/apidocs/org/eclipse/jgit/revwalk/RevCommit.html#getTree()
 
+/*
+ * Comprehension Jgit et src:
+ * https://www.baeldung.com/jgit
+ * https://itsallbinary.com/git-commands-from-java-using-jgit-programmatically-git-clone-checkout-b-commit-a-log-status-branch/
+ * https://stackoverflow.com/questions/15822544/jgit-how-to-get-all-commits-of-a-branch-without-changes-to-the-working-direct
+* */
 
 
 public class Main {
 
-    /*
-     * src: https://stackoverflow.com/questions/15822544/jgit-how-to-get-all-commits-of-a-branch-without-changes-to-the-working-direct
-    */
     public static void main(String[] args)
             throws IOException, InvalidRemoteException, TransportException, GitAPIException {
 
@@ -72,8 +68,11 @@ public class Main {
                     int i = 1;
                     for (RevCommit revCommit : commits) {
                         System.out.println(i);
-                        if(i == 212){ // pr prendre juste 5% des commits du jfreechart
+                        if(i == 212){ // pr prendre juste 5% des commits du jfreechart (5% de 4211 == 211)
                             CSVMaker.toCsv("GitVersionsData",valuesToDisplay);
+
+                            // Pour supprimer le dossier creer lors du clonage du repertoire Github
+                            FileUtils.forceDelete(new File("LocalRepo"));
                             return;
                         }
 
@@ -84,7 +83,10 @@ public class Main {
                         i++;
 
                     }
+
+                    // PR TESTER AVEC AUTRE REPERTOIRE QUE LE JFREECHART
                     //CSVMaker.toCsv("GitVersionsData",valuesToDisplay);
+                    //FileUtils.forceDelete(new File("LocalRepo"));
                 }
             }
         }
@@ -95,6 +97,7 @@ public class Main {
      * Src:
      * https://stackoverflow.com/questions/10993634/how-do-i-do-git-show-sha1file-using-jgit
      * https://stackoverflow.com/questions/19941597/use-jgit-treewalk-to-list-files-and-folders
+     * https://stackoverflow.com/questions/40590039/how-to-get-the-file-list-for-a-commit-with-jgit
     */
 
     /*
