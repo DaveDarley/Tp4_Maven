@@ -33,6 +33,11 @@ import org.apache.commons.io.FileUtils;
  * https://stackoverflow.com/questions/15822544/jgit-how-to-get-all-commits-of-a-branch-without-changes-to-the-working-direct
 * */
 
+/*
+ * Delete repertoire Local Java:
+ * https://stackoverflow.com/questions/20281835/how-to-delete-a-folder-with-files-using-java
+ */
+
 
 public class Main {
 
